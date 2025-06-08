@@ -1,6 +1,7 @@
 /node_modules
 /public/hot
 /public/storage
+/public/storage/smartadmin/dist
 /storage/*.key
 /vendor
 .env
