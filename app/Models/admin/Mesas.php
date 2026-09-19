@@ -16,6 +16,6 @@ class Mesas extends Model
         'posicion',
     ];
     public $timestamps = false;
-    protected $table = 'public.mesas';
+    protected $table = 'mesas';
     protected $primaryKey='id';
 }

@@ -15,6 +15,6 @@ class Cliente extends Model
         'dir',
     ];
     public $timestamps = false;
-    protected $table = 'public.clientes';
+    protected $table = 'clientes';
     protected $primaryKey='id';
 }

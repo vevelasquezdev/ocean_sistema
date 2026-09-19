@@ -57,7 +57,7 @@ class PedidosController extends Controller
     public function store(Request $request)
     {
         
-        $id_pedido = DB::table('pedidos')->insertGetId([
+        $id_pedido = DB::table('pedidos_tem')->insertGetId([
             'id_mesa' => $request['id_mesa'],
             'id_user' => $request['id_user'],
             'fecha' => date('Y-m-d H:i:s')
@@ -79,7 +79,7 @@ class PedidosController extends Controller
             ];
         }
 
-        $row_insert = DB::table('pedido_detalle')->insert($dataSet);
+        $row_insert = DB::table('pedido_detalle_temp')->insert($dataSet);
 
         $up_mesa = DB::table('mesas')
             ->where('id', $request['id_mesa'])

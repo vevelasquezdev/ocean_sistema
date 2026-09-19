@@ -54,10 +54,11 @@ class ClienteController extends Controller
     
     public function show($id)
     {
+       
         $get_cliente = DB::table('pedidos_tem')->where('id', $id)->get();
-
+        
         $user = DB::table('users')->where('id', $get_cliente[0]->id_user)->get();
-
+        
         if($user[0]->id)
         {
             if($get_cliente[0]->id_clie){

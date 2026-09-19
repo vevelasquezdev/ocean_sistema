@@ -14,6 +14,7 @@ class CreateCartaTable extends Migration
             $table->string('tip_pro', 50);
             $table->string('des_pro', 100);
             $table->double('pre_pro', 10, 2);
+            $table->string('cocina', 50);
             $table->timestamps();
         });
     }

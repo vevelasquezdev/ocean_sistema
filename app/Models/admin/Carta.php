@@ -18,7 +18,7 @@ class Carta extends Model
         'cocina'
     ];
     public $timestamps = false;
-    protected $table = 'public.carta';
+    protected $table = 'carta';
     protected $primaryKey='id';
 
     protected static function newFactory()

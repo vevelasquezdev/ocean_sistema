@@ -29,11 +29,7 @@
                                 <div class="dropdown-menu" aria-labelledby="btnGroupVerticalDrop2" x-placement="bottom-start" style="position: absolute; will-change: top, left; top: 37px; left: 0px;">
                                     <a class="dropdown-item" href="javascript:void(0);" onclick="OpenPedido({{ $mesa->id }},{{ $mesa->id_pedido }},{{ $mesa->id_user }},'{{ $mesa->rol }}')" >Abrir Mesa</a>
                                 </div>
-                            </div>
-                            {{-- <a href="javascript:void(0);" onclick="OpenPedido({{ $mesa->id }},{{ $mesa->id_pedido }},{{ $mesa->id_user }},'{{ $mesa->rol }}')" class="btn btn-warning btn-lg btn-icon position-relative js-waves-off ml-2 mt-4" data-template="<div class=&quot;tooltip&quot; role=&quot;tooltip&quot;><div class=&quot;tooltip-inner bg-dark&quot;></div></div>" data-toggle="tooltip" title="" data-original-title="{{ $mesa->rol }}: {{ $mesa->nombre }}">
-                                <i class="fa fa-window-maximize"></i>
-                                <span class="badge border border-light rounded-pill bg-success-700 position-absolute pos-bottom pos-right">{{ $mesa->id }}</span>
-                            </a>                             --}}
+                            </div>                           
                         @elseif ($mesa->estado == 1)                        
                             <a href="javascript:void(0);" class="btn btn-danger btn-lg btn-icon position-relative js-waves-off ml-2 mt-4" data-template="<div class=&quot;tooltip&quot; role=&quot;tooltip&quot;><div class=&quot;tooltip-inner bg-dark&quot;></div></div>" data-toggle="tooltip" title="" data-original-title="Realizando pedido.">
                                 <i class="fa fa-window-maximize"></i>
@@ -48,11 +44,7 @@
                             <div class="dropdown-menu" aria-labelledby="btnGroupVerticalDrop1" x-placement="bottom-start" style="position: absolute; will-change: top, left; top: 37px; left: 0px;">
                                 <a class="dropdown-item" href="javascript:void(0);" onclick="OpenModal_temp({{ $mesa->id }},{{ $mesa->estado }})">Ocupar Mesa</a>
                             </div>
-                        </div>
-                            {{-- <a href="javascript:void(0);" onclick="OpenModal_temp({{ $mesa->id }},{{ $mesa->estado }})" class="btn btn-outline-primary btn-lg btn-icon position-relative js-waves-off ml-2 mt-4" title="Mesa Libre">
-                                <i class="fa fa-window-maximize"></i>
-                                <span class="badge border border-light rounded-pill bg-success-700 position-absolute pos-bottom pos-right">{{ $mesa->id }}</span>
-                            </a>  --}}
+                        </div>                          
                         @endif
                     @endforeach
                 </div>
@@ -510,7 +502,7 @@ function guardar_pedido(){
             setTimeout(function(){    
                 MsgDlgLoadAjaxFinish("dlg_form");
                 close_modal();
-            }, 500);
+            }, 1000);
         }
         
     }).fail( function(data, jqXHR, textStatus, errorThrown ) {

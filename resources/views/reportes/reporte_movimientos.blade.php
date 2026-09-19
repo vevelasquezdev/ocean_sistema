@@ -9,7 +9,7 @@
         <div id="panel-1" class="panel">
             <div class="panel-hdr">
                 <h2>
-                    <span class="fw-300"><i>Reporte</i></span>&nbsp;&nbsp;Movimientos Caja 
+                    <span class="fw-300"><i>Reporte</i></span>&nbsp;&nbsp;Movimientos Caja
                 </h2>
                 <div class="panel-toolbar">
                     <button class="btn btn-panel" data-action="panel-collapse" data-toggle="tooltip" data-offset="0,10" data-original-title="Collapse"></button>

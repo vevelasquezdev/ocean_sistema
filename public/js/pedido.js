@@ -20,7 +20,7 @@ function OpenPedido(id_mesa,id_pedido_temp, id_user_mesa,rol){
 
 function actualizar_tabla(id_pedido,id_mesa,id_user){
     console.log(id_pedido+'  --  '+id_mesa+'  --  '+id_user);
-    //$('#tableDynamic_ittems').DataTable().ajax.url("table_pedido_detalle"+"?id_pedido="+id_pedido+"&id_mesa="+id_mesa+"&id_user="+id_user).load();
+    $('#tableDynamic_ittems').DataTable().ajax.url("table_pedido_detalle"+"?id_pedido="+id_pedido+"&id_mesa="+id_mesa+"&id_user="+id_user).load();
 }
 
 function traer_cliente(id_pedido_temp){ //traer cliente y usuario de pedido

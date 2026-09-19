@@ -213,7 +213,7 @@ class ReportePedidosController extends Controller
         //echo 'efectivo: '.$t_efectivo.'<br>'.'tarjeta: '.$t_tarjeta.'<br>'.'t_yape: '.$t_yape.'<br>'.'t_transferencia: '.$t_transferencia.'<br>'.'t_credito: '.$t_credito.'<br>';
         $this->fpdf->AddPage();        
         $this->fpdf->SetFont('Helvetica','B', 15);       
-        $this->fpdf->Image('smartadmin/dist/img/nativo.jpg', '12','15','35','30','JPG');
+        $this->fpdf->Image('smartadmin/dist/img/ocean_logo2.png', '12','15','32','32','PNG');
         $this->fpdf->setXY(60,15);
         $this->fpdf->SetTextColor(255, 0, 0);//color de fondo rgb
         $this->fpdf->Cell(100,8,'REPORTE CAJA  '.date('d-m-Y G:ia'),'B',1,'C',0);        

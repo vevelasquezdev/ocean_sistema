@@ -60,14 +60,15 @@ class HomeMesasController extends Controller
 
     public function print_ticket($id_pedido_temp){
         $datos = DB::table('vw_ticket')->where('id', $id_pedido_temp)->orderBy('id_detalle')->get();
+       
         $this->fpdf->AddPage();        
-        $this->fpdf->Image('smartadmin/dist/img/nativo.jpg', '23','7','35','30','JPG');
+        $this->fpdf->Image('smartadmin/dist/img/ocean_logo2.png', '23','7','35','34','PNG');
         $this->fpdf->Ln(23);
         $this->fpdf->SetFont('Helvetica','', 8); 
-        $this->fpdf->Ln(7);      
-        $this->fpdf->Cell(60,4,'Mariscal Benavides 301 - Cercado',0,1,'C');
-        $this->fpdf->Cell(60,4,'frente al parque selva alegre',0,1,'C');
-        $this->fpdf->Cell(60,4,'Tel: 975324507',0,1,'C');     
+        $this->fpdf->Ln(10);      
+        $this->fpdf->Cell(60,4,'Av. Costanera - Playa Las Brisas',0,1,'C');
+        $this->fpdf->Cell(60,4,'La Punta Camana',0,1,'C');
+        // $this->fpdf->Cell(60,4,'Tel: 975324507',0,1,'C');     
 
         // DATOS FACTURA        
         $this->fpdf->Ln(1);
