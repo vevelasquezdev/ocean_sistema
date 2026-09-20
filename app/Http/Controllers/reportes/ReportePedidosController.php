@@ -27,31 +27,53 @@ class ReportePedidosController extends Controller
     }
 
     public function reporte_cocina(Request $request){
-        if($request['cocina']==0){
-            $data = DB::select("select sum(cant) as cant,des_pro,cocina,pre_pro,(sum(cant::double precision)*pre_pro::double precision) as subtotal from vw_detalle_temp where cocina != 'BARRA' and fechahora_detalle::date = '".date('Y-m-d',strtotime($request['fch']))."' group by id_carta,des_pro,cocina,pre_pro");
-        }elseif($request['cocina']==1){
-            $data = DB::select("select sum(cant) as cant,des_pro,cocina, pre_pro,(sum(cant::double precision)*pre_pro::double precision) as subtotal from vw_detalle_temp where cocina = 'COCINA_1' and fechahora_detalle::date = '".date('Y-m-d',strtotime($request['fch']))."' group by id_carta,des_pro,cocina,pre_pro");
-        }elseif($request['cocina']==2){
-            $data = DB::select("select sum(cant) as cant,des_pro,cocina,pre_pro,(sum(cant::double precision)*pre_pro::double precision) as subtotal from vw_detalle_temp where cocina = 'COCINA_2' and fechahora_detalle::date = '".date('Y-m-d',strtotime($request['fch']))."' group by id_carta,des_pro,cocina,pre_pro");
-        }        
+        $fechaInicio = date('Y-m-d', strtotime($request['fch']));
+        $fechaFin = date('Y-m-d', strtotime($request->input('fch_fin', $request['fch'])));
+
+        $query = DB::table('vw_detalle_temp')
+            ->selectRaw('sum(cant) as cant, des_pro, cocina, pre_pro, (sum(cant::double precision) * pre_pro::double precision) as subtotal')
+            ->whereBetween(DB::raw('fechahora_detalle::date'), [$fechaInicio, $fechaFin]);
+
+        if($request['cocina'] == 0){
+            $query->where('cocina', '!=', 'BARRA');
+        }elseif($request['cocina'] == 1){
+            $query->where('cocina', 'COCINA_1');
+        }elseif($request['cocina'] == 2){
+            $query->where('cocina', 'COCINA_2');
+        }
+
+        $data = $query
+            ->groupBy('id_carta', 'des_pro', 'cocina', 'pre_pro')
+            ->get();
+
         return DataTables::of($data)
             ->addIndexColumn()
             ->make(true);
     }
 
     public function reporte_barra(Request $request){
-        if($request['barra']==0){
-            $data = DB::select("select sum(cant) as cant,des_pro,cocina,pre_pro,(sum(cant::double precision)*pre_pro::double precision) as subtotal  from vw_detalle_temp where cocina = 'BARRA' and fechahora_detalle::date = '".date('Y-m-d',strtotime($request['fch']))."' group by id_carta,des_pro,cocina,pre_pro");
-        }elseif($request['barra']==1){
-            $data = DB::select("select sum(cant) as cant,des_pro,cocina,pre_pro,(sum(cant::double precision)*pre_pro::double precision) as subtotal  from vw_detalle_temp where cocina = 'BARRA' and fechahora_detalle::date = '".date('Y-m-d',strtotime($request['fch']))."' and id_mesa not between 101 and 200 group by id_carta,des_pro,cocina,pre_pro");
-        }elseif($request['barra']==2){
-            $data = DB::select("select sum(cant) as cant,des_pro,cocina,pre_pro,(sum(cant::double precision)*pre_pro::double precision) as subtotal  from vw_detalle_temp where cocina = 'BARRA' and fechahora_detalle::date = '".date('Y-m-d',strtotime($request['fch']))."' and id_mesa between 101 and 150 group by id_carta,des_pro,cocina,pre_pro");
-        }elseif($request['barra']==3){
-            $data = DB::select("select sum(cant) as cant,des_pro,cocina,pre_pro,(sum(cant::double precision)*pre_pro::double precision) as subtotal  from vw_detalle_temp where cocina = 'BARRA' and fechahora_detalle::date = '".date('Y-m-d',strtotime($request['fch']))."' and id_mesa between 151 and 200 group by id_carta,des_pro,cocina,pre_pro");
-        }elseif($request['barra']==4){
-            $data = DB::select("select sum(cant) as cant,des_pro,cocina,pre_pro,(sum(cant::double precision)*pre_pro::double precision) as subtotal  from vw_detalle_temp where cocina = 'BARRA' and fechahora_detalle::date = '".date('Y-m-d',strtotime($request['fch']))."' and id_mesa between 501 and 600 group by id_carta,des_pro,cocina,pre_pro");
+        $fechaInicio = date('Y-m-d', strtotime($request['fch']));
+        $fechaFin = date('Y-m-d', strtotime($request->input('fch_fin', $request['fch'])));
+
+        $query = DB::table('vw_detalle_temp')
+            ->selectRaw('sum(cant) as cant, des_pro, cocina, pre_pro, (sum(cant::double precision) * pre_pro::double precision) as subtotal')
+            ->where('cocina', 'BARRA')
+            ->whereBetween(DB::raw('fechahora_detalle::date'), [$fechaInicio, $fechaFin]);
+
+        if($request['barra'] == 1){
+            $query->whereNotBetween('id_mesa', [101, 200]);
+        }elseif($request['barra'] == 2){
+            $query->whereBetween('id_mesa', [101, 150]);
+        }elseif($request['barra'] == 3){
+            $query->whereBetween('id_mesa', [151, 200]);
+        }elseif($request['barra'] == 4){
+            $query->whereBetween('id_mesa', [501, 600]);
         }
-        
+
+        $data = $query
+            ->groupBy('id_carta', 'des_pro', 'cocina', 'pre_pro')
+            ->get();
+
              
         return DataTables::of($data)
             ->addIndexColumn()
@@ -64,98 +86,25 @@ class ReportePedidosController extends Controller
     }
 
     public function reporte_movimientos(Request $request){
-        if($request['caja']==0){
-            if($request['tipo']==0){
-                $data = DB::table('vw_movimientos')
-                    ->whereDate('fecha_eje', date('Y-m-d',strtotime($request['fch'])))
-                    ->latest('id')
-                    ->get();
-            }elseif($request['tipo']==1){
-                $data = DB::table('vw_movimientos')
-                    ->whereDate('fecha_eje', date('Y-m-d',strtotime($request['fch'])))
-                    ->where('monto','>',0)
-                    ->latest('id')
-                    ->get();
-            }elseif($request['tipo']==2){
-                $data = DB::table('vw_movimientos')
-                    ->whereDate('fecha_eje', date('Y-m-d',strtotime($request['fch'])))
-                    ->where('monto','<',0)
-                    ->latest('id')
-                    ->get();
-            }
-            
-        }elseif($request['caja']==1){
-            if($request['tipo']==0){
-                $data = DB::table('vw_movimientos')
-                    ->whereDate('fecha_eje', date('Y-m-d',strtotime($request['fch'])))
-                    ->where('caja',1)
-                    ->latest('id')
-                    ->get();
-            }elseif($request['tipo']==1){
-                $data = DB::table('vw_movimientos')
-                    ->whereDate('fecha_eje', date('Y-m-d',strtotime($request['fch'])))
-                    ->where('caja',1)
-                    ->where('monto','>',0)
-                    ->latest('id')
-                    ->get();
-            }elseif($request['tipo']==2){
-                $data = DB::table('vw_movimientos')
-                    ->whereDate('fecha_eje', date('Y-m-d',strtotime($request['fch'])))
-                    ->where('caja',1)
-                    ->where('monto','<',0)
-                    ->latest('id')
-                    ->get();
-            }
-            
-        }elseif($request['caja']==2){
-            if($request['tipo']==0){
-                $data = DB::table('vw_movimientos')
-                    ->whereDate('fecha_eje', date('Y-m-d',strtotime($request['fch'])))
-                    ->where('caja',2)
-                    ->latest('id')
-                    ->get();
-            }elseif($request['tipo']==1){
-                $data = DB::table('vw_movimientos')
-                    ->whereDate('fecha_eje', date('Y-m-d',strtotime($request['fch'])))
-                    ->where('caja',2)
-                    ->where('monto','>',0)
-                    ->latest('id')
-                    ->get();
-            }elseif($request['tipo']==2){
-                $data = DB::table('vw_movimientos')
-                    ->whereDate('fecha_eje', date('Y-m-d',strtotime($request['fch'])))
-                    ->where('caja',2)
-                    ->where('monto','<',0)
-                    ->latest('id')
-                    ->get();
-            }
-            
-        }elseif($request['caja']==3){
-            if($request['tipo']==0){
-                $data = DB::table('vw_movimientos')
-                    ->whereDate('fecha_eje', date('Y-m-d',strtotime($request['fch'])))
-                    ->where('caja',3)
-                    ->latest('id')
-                    ->get();
-            }elseif($request['tipo']==1){
-                $data = DB::table('vw_movimientos')
-                    ->whereDate('fecha_eje', date('Y-m-d',strtotime($request['fch'])))
-                    ->where('caja',3)
-                    ->where('monto','>',0)
-                    ->latest('id')
-                    ->get();
-            }elseif($request['tipo']==2){
-                $data = DB::table('vw_movimientos')
-                    ->whereDate('fecha_eje', date('Y-m-d',strtotime($request['fch'])))
-                    ->where('caja',3)
-                    ->where('monto','<',0)
-                    ->latest('id')
-                    ->get();
-            }
+        $fechaInicio = date('Y-m-d', strtotime($request['fch']));
+        $fechaFin = date('Y-m-d', strtotime($request['fch_fin']));
+
+        $query = DB::table('vw_movimientos')
+            ->whereDate('fecha_eje', '>=', $fechaInicio)
+            ->whereDate('fecha_eje', '<=', $fechaFin);
+
+        if($request['caja'] != 0){
+            $query->where('caja', $request['caja']);
         }
 
-        
-        
+        if($request['tipo'] == 1){
+            $query->where('monto', '>', 0);
+        }elseif($request['tipo'] == 2){
+            $query->where('monto', '<', 0);
+        }
+
+        $data = $query->latest('id')->get();
+
         return Datatables::of($data)
             ->addIndexColumn()            
             ->addColumn('estado', function($row){
@@ -185,29 +134,32 @@ class ReportePedidosController extends Controller
     }
 
     public function reporte_movimientos_pdf(Request $request){
+        $fechaInicio = date('Y-m-d', strtotime($request['fch']));
+        $fechaFin = date('Y-m-d', strtotime($request['fch_fin']));
+
         if($request['caja']==0){
-            $t_efectivo=DB::table('vw_movimientos')->whereDate('fecha_eje', date('Y-m-d',strtotime($request['fch'])))->sum('efectivo');
-            $t_tarjeta=DB::table('vw_movimientos')->whereDate('fecha_eje', date('Y-m-d',strtotime($request['fch'])))->sum('tarjeta');
-            $t_yape=DB::table('vw_movimientos')->whereDate('fecha_eje', date('Y-m-d',strtotime($request['fch'])))->sum('yape');
-            $t_transferencia=DB::table('vw_movimientos')->whereDate('fecha_eje', date('Y-m-d',strtotime($request['fch'])))->sum('transferencia');
-            $t_credito=DB::table('vw_movimientos')->whereDate('fecha_eje', date('Y-m-d',strtotime($request['fch'])))->sum('credito');
+            $t_efectivo=DB::table('vw_movimientos')->whereBetween(DB::raw('fecha_eje::date'), [$fechaInicio, $fechaFin])->sum('efectivo');
+            $t_tarjeta=DB::table('vw_movimientos')->whereBetween(DB::raw('fecha_eje::date'), [$fechaInicio, $fechaFin])->sum('tarjeta');
+            $t_yape=DB::table('vw_movimientos')->whereBetween(DB::raw('fecha_eje::date'), [$fechaInicio, $fechaFin])->sum('yape');
+            $t_transferencia=DB::table('vw_movimientos')->whereBetween(DB::raw('fecha_eje::date'), [$fechaInicio, $fechaFin])->sum('transferencia');
+            $t_credito=DB::table('vw_movimientos')->whereBetween(DB::raw('fecha_eje::date'), [$fechaInicio, $fechaFin])->sum('credito');
             $data = DB::table('vw_movimientos')
-                    ->whereDate('fecha_eje', date('Y-m-d',strtotime($request['fch'])))                    
+                    ->whereBetween(DB::raw('fecha_eje::date'), [$fechaInicio, $fechaFin])
                     ->latest('id')
                     ->get();
-            $t_total=DB::table('vw_movimientos')->whereDate('fecha_eje', date('Y-m-d',strtotime($request['fch'])))->sum('monto');
+            $t_total=DB::table('vw_movimientos')->whereBetween(DB::raw('fecha_eje::date'), [$fechaInicio, $fechaFin])->sum('monto');
         }else{
-            $t_efectivo=DB::table('vw_movimientos')->whereDate('fecha_eje', date('Y-m-d',strtotime($request['fch'])))->where('caja',$request['caja'])->sum('efectivo');
-            $t_tarjeta=DB::table('vw_movimientos')->whereDate('fecha_eje', date('Y-m-d',strtotime($request['fch'])))->where('caja',$request['caja'])->sum('tarjeta');
-            $t_yape=DB::table('vw_movimientos')->whereDate('fecha_eje', date('Y-m-d',strtotime($request['fch'])))->where('caja',$request['caja'])->sum('yape');
-            $t_transferencia=DB::table('vw_movimientos')->whereDate('fecha_eje', date('Y-m-d',strtotime($request['fch'])))->where('caja',$request['caja'])->sum('transferencia');
-            $t_credito=DB::table('vw_movimientos')->whereDate('fecha_eje', date('Y-m-d',strtotime($request['fch'])))->where('caja',$request['caja'])->sum('credito');
+            $t_efectivo=DB::table('vw_movimientos')->whereBetween(DB::raw('fecha_eje::date'), [$fechaInicio, $fechaFin])->where('caja',$request['caja'])->sum('efectivo');
+            $t_tarjeta=DB::table('vw_movimientos')->whereBetween(DB::raw('fecha_eje::date'), [$fechaInicio, $fechaFin])->where('caja',$request['caja'])->sum('tarjeta');
+            $t_yape=DB::table('vw_movimientos')->whereBetween(DB::raw('fecha_eje::date'), [$fechaInicio, $fechaFin])->where('caja',$request['caja'])->sum('yape');
+            $t_transferencia=DB::table('vw_movimientos')->whereBetween(DB::raw('fecha_eje::date'), [$fechaInicio, $fechaFin])->where('caja',$request['caja'])->sum('transferencia');
+            $t_credito=DB::table('vw_movimientos')->whereBetween(DB::raw('fecha_eje::date'), [$fechaInicio, $fechaFin])->where('caja',$request['caja'])->sum('credito');
             $data = DB::table('vw_movimientos')
-                ->whereDate('fecha_eje', date('Y-m-d',strtotime($request['fch'])))
+                ->whereBetween(DB::raw('fecha_eje::date'), [$fechaInicio, $fechaFin])
                 ->where('caja',$request['caja'])
                 ->latest('id')
                 ->get();
-            $t_total=DB::table('vw_movimientos')->whereDate('fecha_eje', date('Y-m-d',strtotime($request['fch'])))->where('caja',$request['caja'])->sum('monto');
+            $t_total=DB::table('vw_movimientos')->whereBetween(DB::raw('fecha_eje::date'), [$fechaInicio, $fechaFin])->where('caja',$request['caja'])->sum('monto');
         }
         
         //echo 'efectivo: '.$t_efectivo.'<br>'.'tarjeta: '.$t_tarjeta.'<br>'.'t_yape: '.$t_yape.'<br>'.'t_transferencia: '.$t_transferencia.'<br>'.'t_credito: '.$t_credito.'<br>';
@@ -217,6 +169,10 @@ class ReportePedidosController extends Controller
         $this->fpdf->setXY(60,15);
         $this->fpdf->SetTextColor(255, 0, 0);//color de fondo rgb
         $this->fpdf->Cell(100,8,'REPORTE CAJA  '.date('d-m-Y G:ia'),'B',1,'C',0);        
+        $this->fpdf->SetTextColor(0, 0, 0);
+        $this->fpdf->SetFont('Helvetica','B',11);
+        $this->fpdf->setXY(60,23);
+        $this->fpdf->Cell(100,6,'Rango: '.date('d-m-Y', strtotime($request['fch'])).' al '.date('d-m-Y', strtotime($request['fch_fin'])),0,1,'C',0);
         $this->fpdf->Ln(10);
         
         $this->fpdf->SetTextColor(64, 64, 64);//color de fondo rgb

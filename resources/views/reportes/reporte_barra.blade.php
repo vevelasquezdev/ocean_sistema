@@ -19,11 +19,19 @@
             <div class="panel-container show">
                 <div class="panel-content">
                     <div class="form-row">
-                        <div class="col-md-2 mb-4">                           
+                        <div class="col-md-2 mb-4">
                             <div class="form-group row">
-                                <label class="col-form-label col-12 col-lg-2 form-label text-lg-right mr-2">Fecha:</label>
+                                <label class="col-form-label col-12 col-lg-2 form-label text-lg-right mr-2">Desde:</label>
                                 <div class="col-12 col-lg-9">
                                     <input style="width: 100px" type="text" id="fch" class="form-control form-control-sm" value="@php echo date('d-m-Y'); @endphp"/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2 mb-4">
+                            <div class="form-group row">
+                                <label class="col-form-label col-12 col-lg-2 form-label text-lg-right mr-2">Hasta:</label>
+                                <div class="col-12 col-lg-9">
+                                    <input style="width: 100px" type="text" id="fch_fin" class="form-control form-control-sm" value="@php echo date('d-m-Y'); @endphp"/>
                                 </div>
                             </div>
                         </div>
@@ -79,7 +87,7 @@
 $(function () { 
     $("#menu_reportes_pedidos").addClass("active open");
     $("#submenu_report_barra").addClass("active");  
-    $('#fch').datepicker({
+    $('#fch, #fch_fin').datepicker({
                     todayHighlight: true,
                     orientation: "bottom left",
                     templates: controls,
@@ -90,7 +98,7 @@ $(function () {
         processing: true,
         serverSide: true,
         responsive: true,
-        ajax: "reporte-barra?fch="+$("#fch").val()+"&barra="+$("#barraselect").val(),
+        ajax: "reporte-barra?fch="+$("#fch").val()+"&fch_fin="+$("#fch_fin").val()+"&barra="+$("#barraselect").val(),
         drawCallback: function () {
             var sum = $('#tableReportBarra').DataTable().column(3).data().sum();            
             $('#ttotal').html(parseFloat(sum).toFixed(2));
@@ -129,7 +137,7 @@ $(function () {
 
 function actualizar_reporte_barra(){
 
-    $('#tableReportBarra').DataTable().ajax.url("reporte-barra?fch="+$("#fch").val()+"&barra="+$("#barraselect").val()).load();
+    $('#tableReportBarra').DataTable().ajax.url("reporte-barra?fch="+$("#fch").val()+"&fch_fin="+$("#fch_fin").val()+"&barra="+$("#barraselect").val()).load();
 
 }
 

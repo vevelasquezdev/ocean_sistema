@@ -20,11 +20,19 @@
                 <div class="panel-content">
                     <div class="form-row">
                         
-                        <div class="col-md-2 mb-4">                           
+                        <div class="col-md-2 mb-4">
                             <div class="form-group row">
-                                <label class="col-form-label col-12 col-lg-2 form-label text-lg-right mr-2">Fecha:</label>
+                                <label class="col-form-label col-12 col-lg-2 form-label text-lg-right mr-2">Desde:</label>
                                 <div class="col-12 col-lg-9">
                                     <input style="width: 100px" type="text" id="fch" class="form-control form-control-sm" value="@php echo date('d-m-Y'); @endphp"/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2 mb-4">
+                            <div class="form-group row">
+                                <label class="col-form-label col-12 col-lg-2 form-label text-lg-right mr-2">Hasta:</label>
+                                <div class="col-12 col-lg-9">
+                                    <input style="width: 100px" type="text" id="fch_fin" class="form-control form-control-sm" value="@php echo date('d-m-Y'); @endphp"/>
                                 </div>
                             </div>
                         </div>
@@ -95,18 +103,18 @@ $(function () {
     $("#menu_reportes_caja").addClass("active open");
     $("#submenu_report_movimientos").addClass("active");  
 
-    $('#fch').datepicker({
+    $('#fch, #fch_fin').datepicker({
                     todayHighlight: true,
                     orientation: "bottom left",
                     templates: controls,
                     format: 'dd-mm-yyyy'
-                });  
+                });
 
     var table = $('#tableReportMovimientos').DataTable({
         processing: true,
         serverSide: true,
         responsive: true,
-        ajax: "reporte-movimientos?fch="+$("#fch").val()+"&caja="+$("#txt_caja_gral").val()+"&tipo="+$("#txt_tipo").val(),
+        ajax: "reporte-movimientos?fch="+$("#fch").val()+"&fch_fin="+$("#fch_fin").val()+"&caja="+$("#txt_caja_gral").val()+"&tipo="+$("#txt_tipo").val(),
         drawCallback: function () {
             var sum = $('#tableReportMovimientos').DataTable().column(6).data().sum();            
             $('#ttotal_caja').html(parseFloat(sum).toFixed(2));
@@ -158,12 +166,12 @@ $(function () {
 
 function actualizar_reporte_movimientos(){
 
-    $('#tableReportMovimientos').DataTable().ajax.url("reporte-movimientos?fch="+$("#fch").val()+"&caja="+$("#txt_caja_gral").val()+"&tipo="+$("#txt_tipo").val()).load();
+    $('#tableReportMovimientos').DataTable().ajax.url("reporte-movimientos?fch="+$("#fch").val()+"&fch_fin="+$("#fch_fin").val()+"&caja="+$("#txt_caja_gral").val()+"&tipo="+$("#txt_tipo").val()).load();
 
 }
 
 function reporte_movimientos_pdf(){
-    window.open('reporte-movimientos-pdf?fch='+$("#fch").val()+"&caja="+$("#txt_caja_gral").val());
+    window.open('reporte-movimientos-pdf?fch='+$("#fch").val()+"&fch_fin="+$("#fch_fin").val()+"&caja="+$("#txt_caja_gral").val());
 }
 
 

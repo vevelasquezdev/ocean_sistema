@@ -19,11 +19,19 @@
             <div class="panel-container show">
                 <div class="panel-content">
                     <div class="form-row">
-                        <div class="col-md-2 mb-4">                           
+                        <div class="col-md-2 mb-4">
                             <div class="form-group row">
-                                <label class="col-form-label col-12 col-lg-2 form-label text-lg-right mr-2">Fecha:</label>
+                                <label class="col-form-label col-12 col-lg-2 form-label text-lg-right mr-2">Desde:</label>
                                 <div class="col-12 col-lg-9">
                                     <input style="width: 100px" type="text" id="fch" class="form-control form-control-sm" value="@php echo date('d-m-Y'); @endphp"/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2 mb-4">
+                            <div class="form-group row">
+                                <label class="col-form-label col-12 col-lg-2 form-label text-lg-right mr-2">Hasta:</label>
+                                <div class="col-12 col-lg-9">
+                                    <input style="width: 100px" type="text" id="fch_fin" class="form-control form-control-sm" value="@php echo date('d-m-Y'); @endphp"/>
                                 </div>
                             </div>
                         </div>
@@ -78,7 +86,7 @@
 $(function () { 
     $("#menu_reportes_pedidos").addClass("active open");
     $("#submenu_report_cocina").addClass("active");  
-    $('#fch').datepicker({
+    $('#fch, #fch_fin').datepicker({
                     todayHighlight: true,
                     orientation: "bottom left",
                     templates: controls,
@@ -89,7 +97,7 @@ $(function () {
         processing: true,
         serverSide: true,
         responsive: true,
-        ajax: "reporte-cocina?fch="+$("#fch").val()+"&cocina="+$("#txt_cocina_gral").val(),
+        ajax: "reporte-cocina?fch="+$("#fch").val()+"&fch_fin="+$("#fch_fin").val()+"&cocina="+$("#txt_cocina_gral").val(),
         drawCallback: function () {
             var sum = $('#tableReportCocina').DataTable().column(3).data().sum();            
             $('#ttotal').html(parseFloat(sum).toFixed(2));
@@ -128,7 +136,7 @@ $(function () {
 
 function actualizar_reporte_cocina(){
 
-    $('#tableReportCocina').DataTable().ajax.url("reporte-cocina?fch="+$("#fch").val()+"&cocina="+$("#txt_cocina_gral").val()).load();
+    $('#tableReportCocina').DataTable().ajax.url("reporte-cocina?fch="+$("#fch").val()+"&fch_fin="+$("#fch_fin").val()+"&cocina="+$("#txt_cocina_gral").val()).load();
 
 }
 
