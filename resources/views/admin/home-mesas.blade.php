@@ -42,8 +42,6 @@
                                         <a class="dropdown-item" href="javascript:void(0);"
                                             onclick="OpenPedido({{ $mesa->id }},{{ $mesa->id_pedido }},{{ $mesa->id_user }},'{{ $mesa->rol }}')">Abrir
                                             Mesa</a>
-                                        <a class="dropdown-item" href="javascript:void(0);" onclick="print_ticket({{ $mesa->id_pedido }})">Imprimir
-                                            Ticket</a>
                                     </div>
                                 </div>
                             @elseif ($mesa->estado == 1)
@@ -483,9 +481,7 @@
 
 
         $(document).ready(function() {
-            $("#DlgOrdenPedido_txt_cant").on("input change blur", validarCantidad);
 
-            // setInterval( function() {
             var seconds = new Date().getSeconds();
             var tseconds = (seconds < 10 ? "0" : "") + seconds;
 
@@ -499,7 +495,6 @@
             var todayDate = new Date().toISOString().slice(0, 10);
             $("#DlgOrdenPedido_txt_fecha").val(todayDate + " " + txtDateTime);
 
-            // },1000);
 
             $("#menu_mesas").addClass("active");
 
@@ -667,7 +662,22 @@
         function add_item() {
 
             $('.error_msg').addClass('d-none').text('');
-            validarCantidad();
+
+            // Validar cantidad solamente al guardar
+            var valorCantidad = $.trim($("#DlgOrdenPedido_txt_cant").val());
+            var cantidad = Number(valorCantidad);
+
+            if (
+                valorCantidad === "" ||
+                !/^\d+$/.test(valorCantidad) ||
+                !Number.isSafeInteger(cantidad) ||
+                cantidad < 1
+            ) {
+                $("#DlgOrdenPedido_txt_cant").val(1);
+                $("#DlgOrdenPedido_txt_cant").focus();
+                return maquinge.notificaciones("La cantidad debe ser mayor o igual a 1...", "OceanClub", "warning");
+            }
+
             if ($("#DlgOrdenPedido_txt_des_pro").val() == "" || $("#hidden_DlgOrdenPedido_id_carta").val() == "") {
                 $("#DlgOrdenPedido_txt_des_pro").focus();
                 return maquinge.notificaciones("Descripcion del producto esta vacia...", 'OceanClub', 'warning');

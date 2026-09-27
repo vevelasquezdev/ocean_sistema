@@ -60,132 +60,74 @@ class HomeMesasController extends Controller
 
     public function print_ticket($id_pedido_temp){
         $datos = DB::table('vw_ticket')->where('id', $id_pedido_temp)->orderBy('id_detalle')->get();
-       
-        $this->fpdf->AddPage();
-        $this->fpdf->SetAutoPageBreak(false);
-        $this->fpdf->SetLeftMargin(8);
-        $this->fpdf->SetRightMargin(8);
-        $anchoTotal = 64;
-        $anchoProducto = 30;
-        $anchoCantidad = 10;
-        $anchoPrecio = 12;
-        $anchoImporte = 12;
-
-        $this->fpdf->Image('smartadmin/dist/img/ocean_logo2.png', '23', '7', '35', '34', 'PNG');
+        $this->fpdf->AddPage();        
+        $this->fpdf->Image(asset('smartadmin/dist/img/ocean_logo2.png'), '23','7','35','30','PNG');
         $this->fpdf->Ln(23);
-        $this->fpdf->SetFont('Helvetica', '', 9);
-        $this->fpdf->Ln(10);      
-        $this->fpdf->Cell($anchoTotal, 4, 'Av. Costanera - Playa Las Brisas', 0, 1, 'C');
-        $this->fpdf->Cell($anchoTotal, 4, 'La Punta Camana', 0, 1, 'C');
+        $this->fpdf->SetFont('Helvetica','', 8); 
+        $this->fpdf->Ln(7);      
+        $this->fpdf->Cell(60,4,'Av. Arancota 123',0,1,'C');
+        $this->fpdf->Cell(60,4,'frente al parque selva alegre',0,1,'C');
+        $this->fpdf->Cell(60,4,'Tel: 975324507',0,1,'C');     
 
         // DATOS FACTURA        
         $this->fpdf->Ln(1);
-        $this->fpdf->Cell($anchoTotal, 4, 'Nro. Ticket: ' . $datos[0]->id, 0, 1, 'C');
-        $this->fpdf->Cell($anchoTotal, 4, 'Fecha Ped.: ' . date('d-m-Y', strtotime($datos[0]->fecha)), 0, 1, 'C');
-        $this->fpdf->Cell($anchoTotal, 4, 'Fecha Imp.: ' . date('d-m-Y') . '  Hora: ' . date('H:i'), 0, 1, 'C');
-        $this->fpdf->Cell($anchoTotal, 4, 'Mesero: ' . $datos[0]->mozo . '  Mesa: ' . $datos[0]->id_mesa, 0, 1, 'C');
+        $this->fpdf->Cell(60,4,'Nro. Ticket :  ' .$datos[0]->id,0,1,'');
+        $this->fpdf->Cell(60,4,'Fecha Ped.:  ' .date('d-m-Y', strtotime($datos[0]->fecha)),0,1,'');
+        $this->fpdf->Cell(60,4,'Fecha Imp.: ' .date('d-m-Y'). '          Hora Imp.:  ' .date('H:i'),0,1,'');
+        $this->fpdf->Cell(60,4,'Mesero:  ' .$datos[0]->mozo. '                    Mesa: ' .$datos[0]->id_mesa ,0,1,'');
 
-        $imprimirCabeceraProductos = function () use ($anchoProducto, $anchoCantidad, $anchoPrecio, $anchoImporte, $anchoTotal) {
-            $this->fpdf->SetFont('Helvetica', 'B', 9);
-            $this->fpdf->Ln(3);
-            $this->fpdf->Cell($anchoProducto, 8, 'Producto', 0, 0, 'C');
-            $this->fpdf->Cell($anchoCantidad, 8, 'Cant', 0, 0, 'C');
-            $this->fpdf->Cell($anchoPrecio, 8, 'Precio', 0, 0, 'C');
-            $this->fpdf->Cell($anchoImporte, 8, 'Total', 0, 1, 'C');
-            $this->fpdf->Cell($anchoTotal, 0, '', 'T');
-            $this->fpdf->Ln(1);
-            $this->fpdf->SetFont('Helvetica', '', 8);
-        };
-
-        $imprimirPie = function () use ($anchoTotal) {
-            $this->fpdf->SetFont('Helvetica', '', 7);
-            $this->fpdf->SetY(140);
-            $this->fpdf->Cell($anchoTotal, 3, 'GRACIAS POR SU PREFERENCIA', 0, 1, 'C');
-            $this->fpdf->SetFont('Helvetica', '', 6);
-            $this->fpdf->Cell($anchoTotal, 3, 'Sistemas para empresas WebSoftAqp 927245347', 0, 1, 'C');
-        };
-
-        $convertirTextoPdf = function ($texto) {
-            return iconv('UTF-8', 'ISO-8859-1//TRANSLIT', (string) $texto);
-        };
-
-        $imprimirCabeceraProductos();
+        // COLUMNAS
+        $this->fpdf->SetFont('Helvetica', 'B', 7);
+        $this->fpdf->Cell(30, 10, 'Producto', 0);
+        $this->fpdf->Cell(8, 10, 'Cant',0,0,'R');
+        $this->fpdf->Cell(10, 10, 'Precio',0,0,'R');
+        $this->fpdf->Cell(15, 10, 'Total',0,0,'R');
+        $this->fpdf->Ln(8);
+        $this->fpdf->Cell(60,0,'','T');
+        $this->fpdf->Ln(0);
+        
+        $this->fpdf->SetFont('Helvetica', '', 7);
 
         $to=0;
-        $productosEnPagina = 0;
-        $productosPorPagina = 7;
         foreach($datos as $data){ 
-            if ($productosEnPagina >= $productosPorPagina) {
-                $imprimirPie();
-                $this->fpdf->AddPage();
-                $productosEnPagina = 0;
-                $productosPorPagina = 11;
-                $this->fpdf->SetFont('Helvetica', '', 8);
-            }
+            $this->fpdf->MultiCell(30,4, $data->des_pro ,0,'L'); 
+            $this->fpdf->Cell(35, -5, $data->cant ,0,0,'R');
 
-            $descripcionProducto = trim($convertirTextoPdf($data->des_pro));
-            $lineasProducto = [];
-            $lineaProducto = '';
-            foreach (preg_split('/\s+/', $descripcionProducto, -1, PREG_SPLIT_NO_EMPTY) as $palabraProducto) {
-                $lineaPropuesta = $lineaProducto === ''
-                    ? $palabraProducto
-                    : $lineaProducto . ' ' . $palabraProducto;
-
-                if ($lineaProducto !== '' && $this->fpdf->GetStringWidth($lineaPropuesta) > $anchoProducto - 1) {
-                    $lineasProducto[] = $lineaProducto;
-                    $lineaProducto = $palabraProducto;
-                } else {
-                    $lineaProducto = $lineaPropuesta;
-                }
-            }
-            if ($lineaProducto !== '') {
-                $lineasProducto[] = $lineaProducto;
-            }
-
-            $this->fpdf->Cell($anchoProducto, 4, array_shift($lineasProducto), 0, 0, 'L');
-            $this->fpdf->Cell($anchoCantidad, 4, $data->cant, 0, 0, 'C');
-            $this->fpdf->Cell($anchoPrecio, 4, number_format(round($data->pre_pro, 2), 2, ',', ' '), 0, 0, 'C');
+            $this->fpdf->Cell(10, -5, number_format(round($data->pre_pro,2), 2, ',', ' '),0,0,'R');
             $y= $data->cant * $data->pre_pro;
-            $this->fpdf->Cell($anchoImporte, 4, number_format(round($y, 2), 2, ',', ' '), 0, 1, 'C');
-
-            foreach ($lineasProducto as $lineaProducto) {
-                $this->fpdf->Cell($anchoProducto, 3, $lineaProducto, 0, 1, 'L');
-            }
-
-            if (trim((string) ($data->comentario ?? '')) !== '') {
-                $this->fpdf->SetFont('Helvetica', '', 7);
-                $this->fpdf->Cell($anchoProducto, 3, '"' . trim($convertirTextoPdf($data->comentario)) . '"', 0, 1, 'L');
-                $this->fpdf->SetFont('Helvetica', '', 8);
-            }
-
+            $this->fpdf->Cell(15, -5, number_format(round($y,2), 2, ',', ' '),0,0,'R');
             $this->fpdf->Ln(1);
+
             $to += $y;
-            $productosEnPagina++;
         }
 
 		$st = $to / 1.18;
         $igv = $st * 0.18;
 
         // SUMATORIO DE LOS PRODUCTOS Y EL IVA
-        $espacioResumen = 22;
-        $inicioPie = 140;
-        if ($this->fpdf->GetY() + $espacioResumen > $inicioPie) {
-            $imprimirPie();
-            $this->fpdf->AddPage();
-        }
-
-        $this->fpdf->Cell($anchoTotal, 0, '', 'T');
-        $this->fpdf->Ln(3);
-        $this->fpdf->SetFont('Helvetica', 'B', 9);
-        $this->fpdf->Cell(45, 5, 'SUBTOTAL', 0, 0, 'R');
-        $this->fpdf->Cell(19, 5, number_format(round($st, 2), 2, ',', ' ') . ' S/', 0, 1, 'R');
-        $this->fpdf->Cell(45, 5, 'IGV 18%', 0, 0, 'R');
-        $this->fpdf->Cell(19, 5, number_format(round($igv, 2), 2, ',', ' ') . ' S/', 0, 1, 'R');
-        $this->fpdf->Cell(45, 6, 'TOTAL', 0, 0, 'R');
-        $this->fpdf->Cell(19, 6, number_format(round($to, 2), 2, ',', ' ') . ' S/', 0, 1, 'R');
+        // $this->fpdf->Ln(1);
+        $this->fpdf->Cell(60,0,'','T');
+        $this->fpdf->Ln(1);    
+        $this->fpdf->Cell(25, 10, 'SUBTOTAL', 0);    
+        $this->fpdf->Cell(20, 10, '', 0);
+        $this->fpdf->Cell(15, 10, number_format(round($st,2), 2, ',', ' ').'  S/',0,0,'R');
+        $this->fpdf->Ln(3);    
+        $this->fpdf->Cell(25, 10, 'IGV 18%', 0);    
+        $this->fpdf->Cell(20, 10, '', 0);
+        $this->fpdf->Cell(15, 10, number_format(round($igv,2), 2, ',', ' ').'  S/',0,0,'R');
+        $this->fpdf->Ln(3);  
+        $this->fpdf->SetFont('Helvetica', 'B', 7);  
+        $this->fpdf->Cell(25, 10, 'TOTAL', 0);    
+        $this->fpdf->Cell(20, 10, '', 0);
+        $this->fpdf->Cell(15, 10, number_format(round($to,2), 2, ',', ' ').'  S/',0,0,'R');
 
         // PIE DE PAGINA
-        $imprimirPie();
+        $this->fpdf->Ln(10);
+        $this->fpdf->SetFont('Helvetica', '', 7);  
+        $this->fpdf->Cell(60,0,'GRACIAS POR SU PREFERENCIA',0,1,'C');
+        $this->fpdf->Ln(3);
+        $this->fpdf->SetFont('Helvetica', '', 6);
+        $this->fpdf->Cell(60,0,' Sistemas para empresas WebSoftAqp 927245347',0,1,'C');
         
         //abrir
         $this->fpdf->Output('ticket_cuenta.pdf','i');
@@ -195,9 +137,9 @@ class HomeMesasController extends Controller
 
         // //guardar
         // $this->fpdf->Output('ticket_cuenta.pdf', 'F');
-        
      
     }
+
 
     
     public function edit($id)
