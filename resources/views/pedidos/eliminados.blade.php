@@ -21,12 +21,20 @@
                     <div class="form-row">                        
                         <div class="col-md-2 mb-4">                           
                             <div class="form-group row">
-                                <label class="col-form-label col-12 col-lg-2 form-label text-lg-right mr-2">Fecha:</label>
+                                <label class="col-form-label col-12 col-lg-2 form-label text-lg-right mr-2">Desde:</label>
                                 <div class="col-12 col-lg-9">
                                     <input style="width: 100px" type="text" id="fch" class="form-control form-control-sm" value="@php echo date('d-m-Y'); @endphp"/>
                                 </div>
                             </div>
-                        </div>                        
+                        </div>
+                        <div class="col-md-2 mb-4">
+                            <div class="form-group row">
+                                <label class="col-form-label col-12 col-lg-2 form-label text-lg-right mr-2">Hasta:</label>
+                                <div class="col-12 col-lg-9">
+                                    <input style="width: 100px" type="text" id="fch_fin" class="form-control form-control-sm" value="@php echo date('d-m-Y'); @endphp"/>
+                                </div>
+                            </div>
+                        </div>
                         <div class="col-md-2 mb-3">                           
                             <button onclick="actualizar();" type="button" class="btn btn-primary btn-sm btn-block waves-effect waves-themed">ACTUALIZAR</button> 
                         </div>                                              
@@ -63,7 +71,7 @@
 $(function () { 
     $("#menu_pedidos").addClass("active open");
     $("#submenu_eliminados").addClass("active");
-    $('#fch').datepicker({
+    $('#fch, #fch_fin').datepicker({
                     todayHighlight: true,
                     orientation: "bottom left",
                     templates: controls,
@@ -73,7 +81,7 @@ $(function () {
         processing: true,
         serverSide: true,
         responsive: true,
-        ajax: "tabla-eliminados?fch="+$("#fch").val(),
+        ajax: "tabla-eliminados?fch="+$("#fch").val()+"&fch_fin="+$("#fch_fin").val(),
         columns: [
             {data: 'id', name: 'id',visible: false, searchable: false},
             {data: 'mozo', name: 'mozo'},
@@ -112,7 +120,7 @@ $(function () {
 });
 
 function actualizar(){
-    $('#tableEliminados').DataTable().ajax.url("tabla-eliminados?fch="+$("#fch").val()).load();
+    $('#tableEliminados').DataTable().ajax.url("tabla-eliminados?fch="+$("#fch").val()+"&fch_fin="+$("#fch_fin").val()).load();
 }
 
 </script>

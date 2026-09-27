@@ -11,6 +11,59 @@ use PhpParser\Node\Stmt\Else_;
 
 class TemporalPedidosController extends Controller
 {
+    public function comandas_stream()
+    {
+        ini_set('output_buffering', 'off');
+        ini_set('zlib.output_compression', '0');
+        if (function_exists('apache_setenv')) {
+            apache_setenv('no-gzip', '1');
+        }
+
+        return response()->stream(function () {
+            set_time_limit(30);
+
+            $ultimoId = (int) DB::table('pedido_detalle_temp')
+                ->where('orden', 'SI')
+                ->max('id');
+            $ultimoCambio = (string) DB::table('pedido_detalle_temp')
+                ->where('orden', 'SI')
+                ->max('create_at');
+            $inicio = time();
+
+            echo ':' . str_repeat(' ', 2048) . "\n\n";
+            flush();
+
+            while (!connection_aborted() && time() - $inicio < 25) {
+                $nuevoId = (int) DB::table('pedido_detalle_temp')
+                    ->where('orden', 'SI')
+                    ->max('id');
+                $nuevoCambio = (string) DB::table('pedido_detalle_temp')
+                    ->where('orden', 'SI')
+                    ->max('create_at');
+
+                if ($nuevoId > $ultimoId || $nuevoCambio !== $ultimoCambio) {
+                    echo "event: comanda\n";
+                    echo 'data: ' . json_encode(['id_detalle' => $nuevoId]) . "\n\n";
+                    $ultimoId = $nuevoId;
+                    $ultimoCambio = $nuevoCambio;
+                } else {
+                    echo ':' . str_repeat(' ', 2048) . "\n\n";
+                }
+
+                if (ob_get_level() > 0) {
+                    ob_flush();
+                }
+                flush();
+                sleep(1);
+            }
+        }, 200, [
+            'Content-Type' => 'text/event-stream',
+            'Cache-Control' => 'no-cache, no-transform',
+            'Content-Encoding' => 'identity',
+            'Connection' => 'keep-alive',
+            'X-Accel-Buffering' => 'no',
+        ]);
+    }
     
     public function index(Request $request)
     {
@@ -86,19 +139,26 @@ class TemporalPedidosController extends Controller
                         return "<a onclick='del_ittem(".$row->id_detalle.")' href='javascript:void(0);' title='Eliminar' class='btn btn-danger btn-sm btn-icon waves-effect waves-themed'>
                                 <i class='fal fa-trash'></i>
                             </a>";
-                    }else{
-                        
                     }
                 }                    
             })
             ->addColumn('comentario', function($row){
-                if($row->comentario){
-                    return $this->limitar_cadena($row->comentario, 30, "...");
-                }else{
-                    return "<a onclick='add_comentario(".$row->id_detalle.")' href='javascript:void(0);' title='Agregar comentario' class='btn btn-info btn-sm btn-icon waves-effect waves-themed'>
-                                <i class='fa fa-comment' aria-hidden='true'></i>
-                            </a>";
-                }                
+                $comentario = trim((string) $row->comentario);
+                if($comentario !== ""){
+                    $comentario_mostrado = $this->limitar_cadena($comentario, 30, "...");
+                    if($row->orden=="NO"){
+                        return $comentario_mostrado."&nbsp;<a onclick='add_comentario(".$row->id_detalle.")' href='javascript:void(0);' title='Editar comentario' class='btn btn-info btn-sm btn-icon waves-effect waves-themed'>
+                                    <i class='fa fa-comment' aria-hidden='true'></i>
+                                </a>";
+                    }
+                    return $comentario_mostrado;
+                }
+                if($row->orden=="SI"){
+                    return "...";
+                }
+                return "<a onclick='add_comentario(".$row->id_detalle.")' href='javascript:void(0);' title='Agregar comentario' class='btn btn-info btn-sm btn-icon waves-effect waves-themed'>
+                            <i class='fa fa-comment' aria-hidden='true'></i>
+                        </a>";
             })
             ->addColumn('pre_pro', function($row){                
                 return number_format((float) $row->pre_pro, 2, '.', '');
@@ -128,9 +188,10 @@ class TemporalPedidosController extends Controller
         ]);
 
         $up_mesa = DB::table('mesas')
-        ->where('id', $request['id_mesa'])
-        ->update([
-            'estado'=> 1
+            ->where('id', $request['id_mesa'])
+            ->update([
+                'estado'=> 1,
+                'id_user' => $request['id_user']
         ]);
 
         if($id_pedido_temp && $up_mesa){

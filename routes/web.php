@@ -63,6 +63,7 @@ Route::group(['middleware'=>['auth','PreventBackHistory']], function(){
     /*temporal mesas get_items */
     Route::get('/table_pedido_detalle_temp/{id_pedido_temp?}{id_mesa?}', [TemporalPedidosController::class, 'get_ittems_table_temp'])->name('table_pedido_detalle_temp');
     Route::resource('temp-pedidos', TemporalPedidosController::class)->names('temp-pedidos');
+    Route::get('comandas-stream', [TemporalPedidosController::class, 'comandas_stream']);
     Route::get('add_coment', [TemporalPedidosController::class, 'add_coment']);
     Route::get('check_orden/{id_detalle_temp}', [TemporalPedidosController::class, 'check_orden']);// eliminar sin pedir razon tabla pedido_detalle_tem
 

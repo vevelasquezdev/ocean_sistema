@@ -40,7 +40,7 @@ class CocinaController extends Controller
                 return "<span class='badge badge-warning badge-pill'>".$row->est_detalle."</span>";
             })
             ->addColumn('fechahora_detalle', function($row){
-                return (new \DateTime($row->fechahora_detalle))->format("G:ia") . PHP_EOL;
+                return (new \DateTime($row->fechahora_detalle))->format("h:i a") . PHP_EOL;
             })
             ->rawColumns(['action','est_detalle','fechahora_detalle'])              
             ->make(true);
@@ -61,9 +61,12 @@ class CocinaController extends Controller
                 return "<span class='badge badge-success badge-pill'>".$row->est_detalle."</span>";
             })             
             ->addColumn('fechahora_detalle', function($row){
-                return (new \DateTime($row->fechahora_detalle))->format("d-m-Y G:ia") . PHP_EOL;
+                return (new \DateTime($row->fechahora_detalle))->format("h:i a") . PHP_EOL;
             })
-            ->rawColumns(['est_detalle','fechahora_detalle','id_mesa'])              
+            ->addColumn('tiempo_preparacion', function($row){                
+                return (new \DateTime($row->tiempo_preparacion))->format("h:i a") . PHP_EOL;
+            })
+            ->rawColumns(['est_detalle','fechahora_detalle','tiempo_preparacion'])              
             ->make(true);
     }
 
@@ -111,7 +114,7 @@ class CocinaController extends Controller
                 ->where('est_detalle','=', 'LISTO')
                 ->where('orden','=', 'SI')
                 ->whereDate('fechahora_detalle', date('Y-m-d',strtotime($request['fch'])))                             
-                ->orderBy('id_detalle')                
+                ->orderByDesc('id_detalle')                
                 ->get();
             
         return DataTables::of($data)
@@ -120,9 +123,12 @@ class CocinaController extends Controller
                     return "<span class='badge badge-success badge-pill'>".$row->est_detalle."</span>";
                 })               
                 ->addColumn('fechahora_detalle', function($row){
-                    return (new \DateTime($row->fechahora_detalle))->format("G:ia") . PHP_EOL;
+                    return (new \DateTime($row->fechahora_detalle))->format("h:i a") . PHP_EOL;
                 })
-                ->rawColumns(['est_detalle','fechahora_detalle','id_mesa'])              
+                ->addColumn('tiempo_preparacion', function($row){                
+                    return (new \DateTime($row->tiempo_preparacion))->format("h:i a") . PHP_EOL;
+                })
+                ->rawColumns(['est_detalle','fechahora_detalle','tiempo_preparacion'])              
                 ->make(true);
     }
 
@@ -164,7 +170,7 @@ class CocinaController extends Controller
         $datos = DB::table('pedido_detalle_temp')->where('id', $id_detalle)
                     ->update([
                         'estado'=> 1,
-                        'tiempo'=> $interval->format('%Hh:%imin')
+                        'tiempo'=> $horaTermino//$interval->format('%Hh:%imin')
                     ]);
 
         $mesass=DB::table('vw_detalle_temp')->where('id_detalle',$id_detalle)->get();

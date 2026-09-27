@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class BarraController extends Controller
 {
@@ -79,7 +80,7 @@ class BarraController extends Controller
                 return "<span class='badge badge-warning badge-pill'>".$row->est_detalle."</span>";
             })
             ->addColumn('fechahora_detalle', function($row){
-                return (new \DateTime($row->fechahora_detalle))->format("G:ia") . PHP_EOL;
+                return (new \DateTime($row->fechahora_detalle))->format("h:ia") . PHP_EOL;
             })
             ->rawColumns(['action','est_detalle','fechahora_detalle'])              
             ->make(true);
@@ -139,9 +140,12 @@ class BarraController extends Controller
                 return "<span class='badge badge-success badge-pill'>".$row->est_detalle."</span>";
             })
             ->addColumn('fechahora_detalle', function($row){
-                return (new \DateTime($row->fechahora_detalle))->format("G:ia") . PHP_EOL;
+                return (new \DateTime($row->fechahora_detalle))->format("h:i a") . PHP_EOL;
             })
-            ->rawColumns(['est_detalle','fechahora_detalle'])              
+            ->addColumn('tiempo_preparacion', function($row){                
+                return (new \DateTime($row->tiempo_preparacion))->format("h:i a") . PHP_EOL;
+            })
+            ->rawColumns(['est_detalle','fechahora_detalle','tiempo_preparacion'])              
             ->make(true);
     }
 
@@ -195,7 +199,7 @@ class BarraController extends Controller
         $datos = DB::table('pedido_detalle_temp')->where('id', $id_detalle)
                     ->update([
                         'estado'=> 1,
-                        'tiempo'=> $interval->format('%Hh:%imin')
+                        'tiempo'=> $horaTermino//$interval->format('%Hh:%imin')
                     ]);
         
         $mesass=DB::table('vw_detalle_temp')->where('id_detalle',$id_detalle)->get();
@@ -248,21 +252,7 @@ class BarraController extends Controller
                 return response()->json(['msg'=>'Salida de Producto<br>Origen: Barra_3<br>Cantidad: '.$mesass[0]->cant.'<br>Producto: '.$mesass[0]->des_pro], 200);
                   
             }
-            // elseif($mesa>=201 && $mesa<=300){
-            //     $sql = DB::table('almacen.salidas')->insert([                
-            //         'id_prod'   => $producto[0]->id,
-            //         'cant'      => $mesass[0]->cant,
-            //         'unidad'    => 'Unid.',           
-            //         'destino'   => 'CONSUMO',
-            //         'origen'    => 'BARRA_1',
-            //         'fecha'     => date('Y-m-d H:i'),
-            //         'mesa'      => $mesa,
-            //         'id_detalle'=> $mesass[0]->id_detalle
-            //     ]);
-                
-            //     return response()->json(['msg'=>'Salida de Producto<br>Origen: Barra_4<br>Cantidad: '.$mesass[0]->cant.'<br>Producto: '.$mesass[0]->des_pro], 200);
-                  
-            // }
+          
         }else{
             if($datos && $hora){
                 return response()->json(['msg'=>'Proceso finalizado correctamente.'], 200);

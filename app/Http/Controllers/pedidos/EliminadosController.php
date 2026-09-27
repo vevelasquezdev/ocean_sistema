@@ -15,7 +15,13 @@ class EliminadosController extends Controller
     }
 
     public function tabla_eliminados(Request $request){
-        $data = DB::table('vw_eliminados')->whereDate('fch_elim', date('Y-m-d',strtotime($request['fch'])))->get();
+        $fechaInicio = date('Y-m-d', strtotime($request['fch']));
+        $fechaFin = date('Y-m-d', strtotime($request->input('fch_fin', $request['fch'])));
+
+        $data = DB::table('vw_eliminados')
+            ->whereDate('fch_elim', '>=', $fechaInicio)
+            ->whereDate('fch_elim', '<=', $fechaFin)
+            ->get();
         
         return DataTables::of($data)
             ->addIndexColumn()
